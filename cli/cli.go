@@ -35,14 +35,15 @@ func Start(m Menu) {
 	m.Start()
 }
 
+// it works, don't touch it
 func (m *Menu) Start() {
 	index := 0
 	prevIndex := 0
 	printed := false
 	trig := false
 	prevIn := inp.Err
-	
 	prevMenu := Menu{}
+
 	for {
 		in := inp.Inp()
 		if in == prevIn {
@@ -76,7 +77,7 @@ func (m *Menu) Start() {
 		} else if in == inp.Up && !trig {
 			prevIn = in
 
-			if index == 0{
+			if index == 0 {
 				index = len(m.Opts) - 1
 			} else {
 				index--
@@ -93,6 +94,7 @@ func (m *Menu) Start() {
 			prevIn = in
 
 			if f := m.Opts[index].Func; f != nil {
+				Clear()
 				f()
 				printed = false
 			} else if next := m.Opts[index].Next; next.Header != "" {

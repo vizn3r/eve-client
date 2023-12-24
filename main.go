@@ -58,16 +58,16 @@ func main() {
 
 EVE Client v0.0.1
 by vizn3r
- ` + "\nTest menu",
+ ` + "\nMain menu",
 		Opts: []cli.Opt{
 			{
-				Name: "Next menu",
+				Name: "Input",
 				Next: cli.Menu{
-					Header: "Next menu options",
+					Header: "Input menu",
 					Opts: []cli.Opt{
 						{
-							Name: "Some function",
-							Func: test,
+							Name: "Test controller",
+							Func: inp.TestController,
 						},
 					},
 				},

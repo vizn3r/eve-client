@@ -1,6 +1,8 @@
 package inp
 
 import (
+	"fmt"
+
 	"github.com/0xcafed00d/joystick"
 )
 
@@ -40,6 +42,15 @@ func OpenController(id int) {
 			return
 		case c.Buttons <- state.Buttons:
 		case c.Axis <- state.AxisData:
+		}
+	}
+}
+
+func TestController() {
+	for {
+		fmt.Println(<- CONTROLLER.Axis, <- CONTROLLER.Buttons)
+		if axis := <- CONTROLLER.Axis; axis[0] > 30000 && <- CONTROLLER.Buttons == 2 {
+			return
 		}
 	}
 }
