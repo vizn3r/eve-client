@@ -2,6 +2,7 @@ package inp
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/0xcafed00d/joystick"
 )
@@ -12,10 +13,25 @@ import (
 type Controller struct {
 	Buttons chan uint32
 	Axis chan []int
+	
 	Input
 }
 
 var CONTROLLER = new(Controller)
+
+func CloseController() {
+	c := CONTROLLER
+	close(c.Exit)
+	close(c.Buttons)
+	close(c.Axis)
+	c.IsRunning = false
+}
+
+func ControllerIsReady() bool {
+	fmt.Println("Controller is not connected")
+	time.Sleep(time.Second)
+	return CONTROLLER.IsRunning
+}
 
 func OpenController(id int) {
 	c := CONTROLLER
@@ -24,21 +40,22 @@ func OpenController(id int) {
 
 	js, err := joystick.Open(id)
 	if err != nil {
-		panic(err)
+		fmt.Println("Controller not found")
+		CloseController()
+		return
 	}
 	defer js.Close()
 
 	for {
 		state, err := js.Read()
 		if err != nil {
-			panic(err)
+			fmt.Println("Controller not found")
+			CloseController()
+			return
 		}
 		select {
 		case <- c.Exit:
-			close(c.Exit)
-			close(c.Buttons)
-			close(c.Axis)
-			c.IsRunning = false
+			CloseController()
 			return
 		case c.Buttons <- state.Buttons:
 		case c.Axis <- state.AxisData:
@@ -47,6 +64,9 @@ func OpenController(id int) {
 }
 
 func TestController() {
+	if !ControllerIsReady() {
+		return
+	}
 	for {
 		fmt.Println(<- CONTROLLER.Axis, <- CONTROLLER.Buttons)
 		if axis := <- CONTROLLER.Axis; axis[0] > 30000 && <- CONTROLLER.Buttons == 2 {

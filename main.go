@@ -2,6 +2,7 @@ package main
 
 import (
 	"eve-client/cli"
+	"eve-client/com"
 	"eve-client/inp"
 	"fmt"
 	"os"
@@ -74,7 +75,7 @@ by vizn3r
 			},
 			{
 				Name: "Some function",
-				Func: test,
+				Func: com.ConnectWS,
 			},
 			{
 				Name: "Exit",
@@ -84,6 +85,5 @@ by vizn3r
 	}
 
 	fmt.Println()
-	
 	cli.Start(menu)
 }

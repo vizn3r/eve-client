@@ -73,13 +73,13 @@ func Inp() InpType {
 			key = '0'
 		}
 		switch key {
-		case 'w', 'W':
+		case 'w', 'W', 'k', 'K':
 			return Up
-		case 's', 'S':
+		case 's', 'S', 'j', 'J':
 			return Down
-		case 'd', 'D':
+		case 'd', 'D', 'l', 'L':
 			return Right
-		case 'a', 'A':
+		case 'a', 'A', 'h', 'H':
 			return Left
 		case 'q', 'Q':
 			return Back

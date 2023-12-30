@@ -1,6 +1,8 @@
 package inp
 
 import (
+	"fmt"
+
 	"github.com/eiannone/keyboard"
 )
 
@@ -11,13 +13,22 @@ type Keyboard struct {
 
 var KEYBOARD = new(Keyboard)
 
+func CloseKeyboard() {
+	k := KEYBOARD
+	close(k.Exit)
+	close(k.Key)
+	k.IsRunning = false
+}
+
 func OpenKeyboard() {
 	k := KEYBOARD
 	k.WG.Add(1)
 	defer k.WG.Done()
 
 	if err := keyboard.Open(); err != nil {
-		panic(err)
+		fmt.Println("Keyboard not found")
+		CloseKeyboard()
+		return
 	}
 
 	// aup 65517
@@ -43,9 +54,7 @@ func OpenKeyboard() {
 		}
 		select {
 		case <- k.Exit:
-			close(k.Exit)
-			close(k.Key)
-			k.IsRunning = false
+			CloseKeyboard()
 			return
 		case k.Key <- char:
 		}
