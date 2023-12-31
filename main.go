@@ -7,13 +7,12 @@ import (
 	"fmt"
 	"os"
 	"sync"
-	"time"
 )
 
-func test() {
-	fmt.Println("Test")
-	time.Sleep(time.Second * 1)
-}
+// func test() {
+// 	fmt.Println("Test")
+// 	time.Sleep(time.Second * 1)
+// }
 
 func main() {
 	var wg sync.WaitGroup

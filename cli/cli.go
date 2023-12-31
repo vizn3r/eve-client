@@ -9,13 +9,14 @@ import (
 )
 
 func Clear() {
-	if runtime.GOOS == "windows" {
+	switch runtime.GOOS {
+	case "windows":
 		c := exec.Command("cmd", "/c", "cls")
 		c.Stdout = os.Stdout
 		if e := c.Run(); e != nil {
 			return
 		}
-	} else if runtime.GOOS == "linux" {
+	case "linux":
 		c := exec.Command("printf", `\033c`)
 		c.Stdout = os.Stdout
 		if e := c.Run(); e != nil {
