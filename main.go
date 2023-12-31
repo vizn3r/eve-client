@@ -18,14 +18,14 @@ func test() {
 func main() {
 	var wg sync.WaitGroup
 
-	var c = inp.CONTROLLER
+	c := inp.CONTROLLER
 	c.Axis = make(chan []int)
 	c.Buttons = make(chan uint32)
 	c.Exit = make(chan bool)
 	c.IsRunning = true
 	c.WG = &wg
 
-	var k = inp.KEYBOARD
+	k := inp.KEYBOARD
 	k.Key = make(chan rune)
 	k.Exit = make(chan bool)
 	k.IsRunning = true
@@ -34,21 +34,19 @@ func main() {
 	go inp.OpenKeyboard()
 	go inp.OpenController(0)
 
-	// for {
-	// 	fmt.Println(inp.Inp())
-	// }
 	exitM := cli.Menu{
 		Header: "Do you really want to exit?",
 		Opts: []cli.Opt{
 			{
 				Name: "Yes",
 				Func: func() {
+					fmt.Println("Exited")
 					os.Exit(0)
 				},
 			},
 		},
 	}
-	
+
 	menu := cli.Menu{
 		Header: `
 ▄▄▄ . ▌ ▐·▄▄▄ .     ▄▄· ▄▄▌  ▪  ▄▄▄ . ▐ ▄ ▄▄▄▄▄
@@ -74,7 +72,7 @@ by vizn3r
 				},
 			},
 			{
-				Name: "Some function",
+				Name: "Connect to WS",
 				Func: com.ConnectWS,
 			},
 			{
@@ -84,6 +82,6 @@ by vizn3r
 		},
 	}
 
-	fmt.Println()
 	cli.Start(menu)
+	wg.Wait()
 }

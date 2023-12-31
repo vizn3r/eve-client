@@ -5,8 +5,8 @@ import (
 )
 
 type Input struct {
-	WG *sync.WaitGroup
-	Exit chan bool
+	WG        *sync.WaitGroup
+	Exit      chan bool
 	IsRunning bool
 }
 
@@ -24,7 +24,6 @@ const (
 	Back
 )
 
-
 func Inp() InpType {
 	c := CONTROLLER
 	k := KEYBOARD
@@ -38,8 +37,8 @@ func Inp() InpType {
 	// analog treshold
 	tresh := 30000
 	if cok {
-		axis := <- c.Axis
-		butt := <- c.Buttons
+		axis := <-c.Axis
+		butt := <-c.Buttons
 		for i, a := range axis {
 			switch i {
 			case 0, 5:
@@ -63,7 +62,6 @@ func Inp() InpType {
 			return Back
 		}
 	}
-
 
 	if kok {
 		var key rune

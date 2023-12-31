@@ -12,11 +12,15 @@ func Clear() {
 	if runtime.GOOS == "windows" {
 		c := exec.Command("cmd", "/c", "cls")
 		c.Stdout = os.Stdout
-		c.Run()
+		if e := c.Run(); e != nil {
+			return
+		}
 	} else if runtime.GOOS == "linux" {
-		c := exec.Command("clear")		
+		c := exec.Command("printf", `\033c`)
 		c.Stdout = os.Stdout
-		c.Run()
+		if e := c.Run(); e != nil {
+			return
+		}
 	}
 }
 
@@ -28,12 +32,14 @@ type Opt struct {
 
 type Menu struct {
 	Header string
-	Opts []Opt
+	Opts   []Opt
 }
 
 func Start(m Menu) {
 	m.Start()
 }
+
+var prevMenu = new(Menu)
 
 // it works, don't touch it
 func (m *Menu) Start() {
@@ -42,7 +48,6 @@ func (m *Menu) Start() {
 	printed := false
 	trig := false
 	prevIn := inp.Err
-	prevMenu := Menu{}
 
 	for {
 		in := inp.Inp()
@@ -69,7 +74,7 @@ func (m *Menu) Start() {
 		} else if in == inp.Down && !trig {
 			prevIn = in
 
-			if index == len(m.Opts) - 1 {
+			if index == len(m.Opts)-1 {
 				index = 0
 			} else {
 				index++
@@ -85,11 +90,10 @@ func (m *Menu) Start() {
 		} else if (in == inp.Back || in == inp.Left) && !trig {
 			prevIn = in
 
-			if p := prevMenu; p.Header != "" {
-				p.Start()
-			} else {
+			if prevMenu.Header == "" {
 				return
 			}
+			prevMenu.Start()
 		} else if (in == inp.Select || in == inp.Right) && !trig {
 			prevIn = in
 
@@ -98,9 +102,9 @@ func (m *Menu) Start() {
 				f()
 				printed = false
 			} else if next := m.Opts[index].Next; next.Header != "" {
-				prevMenu = *m
+				prevMenu = m
 				next.Start()
 			}
-		} 
+		}
 	}
 }

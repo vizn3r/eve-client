@@ -12,13 +12,14 @@ import (
 
 type Controller struct {
 	Buttons chan uint32
-	Axis chan []int
-	
+	Axis    chan []int
+
 	Input
 }
 
 var CONTROLLER = new(Controller)
 
+// Close CONTROLLER channels and set IsRunning to false
 func CloseController() {
 	c := CONTROLLER
 	close(c.Exit)
@@ -28,8 +29,10 @@ func CloseController() {
 }
 
 func ControllerIsReady() bool {
-	fmt.Println("Controller is not connected")
-	time.Sleep(time.Second)
+	if !CONTROLLER.IsRunning {
+		fmt.Println("Controller is not connected")
+		time.Sleep(time.Second)
+	}
 	return CONTROLLER.IsRunning
 }
 
@@ -37,11 +40,11 @@ func OpenController(id int) {
 	c := CONTROLLER
 	c.WG.Add(1)
 	defer c.WG.Done()
+	defer CloseController()
 
 	js, err := joystick.Open(id)
 	if err != nil {
 		fmt.Println("Controller not found")
-		CloseController()
 		return
 	}
 	defer js.Close()
@@ -50,12 +53,10 @@ func OpenController(id int) {
 		state, err := js.Read()
 		if err != nil {
 			fmt.Println("Controller not found")
-			CloseController()
 			return
 		}
 		select {
-		case <- c.Exit:
-			CloseController()
+		case <-c.Exit:
 			return
 		case c.Buttons <- state.Buttons:
 		case c.Axis <- state.AxisData:
@@ -68,8 +69,8 @@ func TestController() {
 		return
 	}
 	for {
-		fmt.Println(<- CONTROLLER.Axis, <- CONTROLLER.Buttons)
-		if axis := <- CONTROLLER.Axis; axis[0] > 30000 && <- CONTROLLER.Buttons == 2 {
+		fmt.Println(<-CONTROLLER.Axis, <-CONTROLLER.Buttons)
+		if axis := <-CONTROLLER.Axis; axis[0] > 30000 && <-CONTROLLER.Buttons == 2 {
 			return
 		}
 	}

@@ -1,8 +1,6 @@
 package inp
 
 import (
-	"fmt"
-
 	"github.com/eiannone/keyboard"
 )
 
@@ -18,18 +16,19 @@ func CloseKeyboard() {
 	close(k.Exit)
 	close(k.Key)
 	k.IsRunning = false
+	// _ = keyboard.Close()
 }
 
 func OpenKeyboard() {
 	k := KEYBOARD
 	k.WG.Add(1)
+	defer CloseKeyboard()
 	defer k.WG.Done()
-
-	if err := keyboard.Open(); err != nil {
-		fmt.Println("Keyboard not found")
-		CloseKeyboard()
-		return
-	}
+	//
+	// if err := keyboard.Open(); err != nil {
+	// 	fmt.Println("Keyboard not found")
+	// 	return
+	// }
 
 	// aup 65517
 	// ado 65516
@@ -37,7 +36,7 @@ func OpenKeyboard() {
 	// ale 65515
 
 	for {
-		char, key, err := keyboard.GetKey()
+		char, key, err := keyboard.GetSingleKey()
 		// fmt.Println(key)
 		switch key {
 		case 65517:
@@ -53,10 +52,9 @@ func OpenKeyboard() {
 			panic(err)
 		}
 		select {
-		case <- k.Exit:
-			CloseKeyboard()
+		case <-k.Exit:
 			return
 		case k.Key <- char:
 		}
 	}
-}	
+}

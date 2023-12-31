@@ -1,6 +1,6 @@
 module eve-client
 
-go 1.21.4
+go 1.21
 
 require (
 	github.com/0xcafed00d/joystick v1.0.1
