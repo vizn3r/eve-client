@@ -55,7 +55,7 @@ func main() {
 ▐█▄▄▌ ███ ▐█▄▄▌    ▐███▌▐█▌▐▌▐█▌▐█▄▄▌██▐█▌ ▐█▌·
  ▀▀▀ . ▀   ▀▀▀     ·▀▀▀ .▀▀▀ ▀▀▀ ▀▀▀ ▀▀ █▪ ▀▀▀ 
 
-EVE Client v0.0.1
+EVE Client v0.0.2
 by vizn3r
  ` + "\nMain menu",
 		Opts: []cli.Opt{
