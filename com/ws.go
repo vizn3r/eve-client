@@ -1,12 +1,13 @@
 package com
 
 import (
+	"eve-client/inp"
 	"flag"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/fasthttp/websocket"
 )
@@ -23,13 +24,14 @@ func ConnectWS() {
 	u := url.URL{
 		Scheme: "ws",
 		Host:   *addr,
-		Path:   "/ws",
+		Path:   "/ws/123",
 	}
 	log.Println("Connecting to:", u.String())
 
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		log.Fatal("Dial:", err)
+		log.Println("Dial:", err)
+		return
 	}
 	defer c.Close()
 
@@ -40,41 +42,57 @@ func ConnectWS() {
 		for {
 			_, msg, err := c.ReadMessage()
 			if err != nil {
-				log.Println("Write:", err)
+				fmt.Println(err)
 				return
 			}
-			log.Println("Recv:", msg)
+			fmt.Println(string(msg))
 		}
 	}()
 
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
-
 	for {
-		select {
-		case <-done:
-			return
-		case t := <-ticker.C:
-			err := c.WriteMessage(websocket.TextMessage, []byte(t.String()))
-			if err != nil {
-				log.Println("write:", err)
+		fmt.Println("Connected to server")
+		msg := inp.StringInp()
+		if msg == "exit" {
+			if err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")); err != nil {
+				fmt.Println(err)
 				return
-			}
-		case <-interrupt:
-			log.Println("interrupt")
-
-			// Cleanly close the connection by sending a close message and then
-			// waiting (with timeout) for the server to close the connection.
-			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			if err != nil {
-				log.Println("write close:", err)
-				return
-			}
-			select {
-			case <-done:
-			case <-time.After(time.Second):
 			}
 			return
 		}
+		if err := c.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
+	//
+	// ticker := time.NewTicker(time.Second)
+	// defer ticker.Stop()
+	//
+	// for {
+	// 	select {
+	// 	case <-done:
+	// 		return
+	// 	case t := <-ticker.C:
+	// 		err := c.WriteMessage(websocket.TextMessage, []byte(t.String()))
+	// 		if err != nil {
+	// 			log.Println("write:", err)
+	// 			return
+	// 		}
+	// 	case <-interrupt:
+	// 		log.Println("interrupt")
+	//
+	// 		// Cleanly close the connection by sending a close message and then
+	// 		// waiting (with timeout) for the server to close the connection.
+	// 		err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	// 		if err != nil {
+	// 			log.Println("write close:", err)
+	// 			return
+	// 		}
+	// 		select {
+	// 		case <-done:
+	// 		case <-time.After(time.Second):
+	// 		}
+	// 		return
+	// 	}
+	// }
 }

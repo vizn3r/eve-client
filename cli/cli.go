@@ -2,28 +2,9 @@ package cli
 
 import (
 	"eve-client/inp"
+	"eve-client/util"
 	"fmt"
-	"os"
-	"os/exec"
-	"runtime"
 )
-
-func Clear() {
-	switch runtime.GOOS {
-	case "windows":
-		c := exec.Command("cmd", "/c", "cls")
-		c.Stdout = os.Stdout
-		if e := c.Run(); e != nil {
-			return
-		}
-	case "linux":
-		c := exec.Command("printf", `\033c`)
-		c.Stdout = os.Stdout
-		if e := c.Run(); e != nil {
-			return
-		}
-	}
-}
 
 type Opt struct {
 	Name string
@@ -60,7 +41,8 @@ func (m *Menu) Start() {
 		}
 
 		if index != prevIndex || !printed {
-			Clear()
+			util.Clear()
+			fmt.Println("STATUS:\nKEYBOARD:", inp.KEYBOARD.IsRunning, "\nCONTROLLER:", inp.CONTROLLER.IsRunning)
 			fmt.Print(m.Header, "\n\n")
 			for i, o := range m.Opts {
 				if index == i {
@@ -99,7 +81,7 @@ func (m *Menu) Start() {
 			prevIn = in
 
 			if f := m.Opts[index].Func; f != nil {
-				Clear()
+				util.Clear()
 				f()
 				printed = false
 			} else if next := m.Opts[index].Next; next.Header != "" {

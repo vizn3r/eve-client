@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 )
 
 // func test() {
@@ -25,7 +26,7 @@ func main() {
 	c.WG = &wg
 
 	k := inp.KEYBOARD
-	k.Key = make(chan rune)
+	k.Output = make(chan inp.KeyboardOutput)
 	k.Exit = make(chan bool)
 	k.IsRunning = true
 	k.WG = &wg
@@ -67,12 +68,23 @@ by vizn3r
 							Name: "Test controller",
 							Func: inp.TestController,
 						},
+						{
+							Name: "Test keyboard",
+							Func: inp.TestKeyboard,
+						},
 					},
 				},
 			},
 			{
 				Name: "Connect to WS",
 				Func: com.ConnectWS,
+			},
+			{
+				Name: "Test",
+				Func: func() {
+					fmt.Println(inp.StringInp())
+					time.Sleep(time.Second)
+				},
 			},
 			{
 				Name: "Exit",

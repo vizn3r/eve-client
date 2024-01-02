@@ -1,28 +1,35 @@
 package inp
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/eiannone/keyboard"
 )
 
 type Keyboard struct {
-	Key chan rune
+	Output chan KeyboardOutput
 	Input
+}
+
+type KeyboardOutput struct {
+	Key  keyboard.Key
+	Char rune
 }
 
 var KEYBOARD = new(Keyboard)
 
 func CloseKeyboard() {
-	k := KEYBOARD
+	k := *KEYBOARD
 	close(k.Exit)
-	close(k.Key)
+	close(k.Output)
 	k.IsRunning = false
 	// _ = keyboard.Close()
 }
 
 func OpenKeyboard() {
-	k := KEYBOARD
+	k := *KEYBOARD
 	k.WG.Add(1)
-	defer CloseKeyboard()
 	defer k.WG.Done()
 	//
 	// if err := keyboard.Open(); err != nil {
@@ -37,24 +44,30 @@ func OpenKeyboard() {
 
 	for {
 		char, key, err := keyboard.GetSingleKey()
-		// fmt.Println(key)
-		switch key {
-		case 65517:
-			char = 'w'
-		case 65516:
-			char = 's'
-		case 65514, 13:
-			char = 'd'
-		case 65515, 8:
-			char = 'a'
+		// Backdoor
+		if key == 3 {
+			keyboard.Close()
+			os.Exit(0)
 		}
 		if err != nil {
 			panic(err)
 		}
 		select {
 		case <-k.Exit:
+			keyboard.Close()
 			return
-		case k.Key <- char:
+		case k.Output <- KeyboardOutput{key, char}:
+			keyboard.Close()
 		}
+	}
+}
+
+func TestKeyboard() {
+	for {
+		o := <-KEYBOARD.Output
+		if o.Key == 13 {
+			return
+		}
+		fmt.Println(o)
 	}
 }

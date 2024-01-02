@@ -1,6 +1,8 @@
 package inp
 
 import (
+	"eve-client/util"
+	"fmt"
 	"sync"
 )
 
@@ -23,6 +25,8 @@ const (
 	Select
 	Back
 )
+
+var RAW string
 
 func Inp() InpType {
 	c := CONTROLLER
@@ -64,13 +68,26 @@ func Inp() InpType {
 	}
 
 	if kok {
-		var key rune
+		var out KeyboardOutput
+		var char rune
 		select {
-		case key = <-k.Key:
+		case out = <-k.Output:
 		default:
-			key = '0'
+			out = KeyboardOutput{0, '0'}
 		}
-		switch key {
+		switch out.Key {
+		case 65517:
+			char = 'w'
+		case 65516:
+			char = 's'
+		case 65514, 13:
+			char = 'd'
+		case 65515, 8:
+			char = 'a'
+		default:
+			char = out.Char
+		}
+		switch char {
 		case 'w', 'W', 'k', 'K':
 			return Up
 		case 's', 'S', 'j', 'J':
@@ -87,4 +104,25 @@ func Inp() InpType {
 	}
 
 	return 0
+}
+
+func StringInp() string {
+	buff := []byte{}
+	for {
+		o := <-KEYBOARD.Output
+		util.Clear()
+		switch o.Key {
+		case 13:
+			return string(buff)
+		case 127:
+			if len(buff) > 0 {
+				buff = buff[:len(buff)-1]
+			}
+		case 32:
+			buff = append(buff, ' ')
+		default:
+			buff = append(buff, byte(o.Char))
+		}
+		fmt.Println(string(buff))
+	}
 }
