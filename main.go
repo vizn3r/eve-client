@@ -4,6 +4,7 @@ import (
 	"eve-client/cli"
 	"eve-client/com"
 	"eve-client/inp"
+	"eve-client/serv"
 	"fmt"
 	"os"
 	"sync"
@@ -31,8 +32,13 @@ func main() {
 	k.IsRunning = true
 	k.WG = &wg
 
+	com.WSCLIENT.Msg = make(chan string)
+	com.WSCLIENT.MsgRes = make(chan string)
+	com.WSCLIENT.Status = serv.STARTING
+
 	go inp.OpenKeyboard()
 	go inp.OpenController(0)
+	go com.ConnectWS()
 
 	exitM := cli.Menu{
 		Header: "Do you really want to exit?",
@@ -42,6 +48,24 @@ func main() {
 				Func: func() {
 					fmt.Println("Exited")
 					os.Exit(0)
+				},
+			},
+		},
+	}
+
+	wsmenu := cli.Menu{
+		Header: "WebSocket communication",
+		Opts: []cli.Opt{
+			// {
+			// 	Name: "Connect",
+			// 	Func: ,
+			// },
+			{
+				Name: "Send Message",
+				Func: func() {
+					msg := inp.StringInp()
+					com.SendWS(msg)
+					fmt.Println(<-com.WSCLIENT.MsgRes)
 				},
 			},
 		},
@@ -76,8 +100,8 @@ by vizn3r
 				},
 			},
 			{
-				Name: "Connect to WS",
-				Func: com.ConnectWS,
+				Name: "WebSocket",
+				Next: wsmenu,
 			},
 			{
 				Name: "Test",

@@ -1,8 +1,8 @@
 package inp
 
 import (
-	"eve-client/util"
-	"fmt"
+	"bufio"
+	"os"
 	"sync"
 )
 
@@ -107,22 +107,33 @@ func Inp() InpType {
 }
 
 func StringInp() string {
-	buff := []byte{}
-	for {
-		o := <-KEYBOARD.Output
-		util.Clear()
-		switch o.Key {
-		case 13:
-			return string(buff)
-		case 127:
-			if len(buff) > 0 {
-				buff = buff[:len(buff)-1]
-			}
-		case 32:
-			buff = append(buff, ' ')
-		default:
-			buff = append(buff, byte(o.Char))
+	KEYBOARD.GetKey = false
+	s := bufio.NewScanner(os.Stdin)
+	for s.Err() == nil {
+		if s.Scan() {
+			return s.Text()
 		}
-		fmt.Println(string(buff))
 	}
+	return ""
 }
+
+// func StringInp() string {
+// 	buff := []byte{}
+// 	for {
+// 		o := <-KEYBOARD.Output
+// 		util.Clear()
+// 		switch o.Key {
+// 		case 13:
+// 			return string(buff)
+// 		case 127, 8:
+// 			if len(buff) > 0 {
+// 				buff = buff[:len(buff)-1]
+// 			}
+// 		case 32:
+// 			buff = append(buff, ' ')
+// 		default:
+// 			buff = append(buff, byte(o.Char))
+// 		}
+// 		fmt.Println(string(buff))
+// 	}
+// }

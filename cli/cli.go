@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"eve-client/com"
 	"eve-client/inp"
 	"eve-client/util"
 	"fmt"
@@ -42,7 +43,7 @@ func (m *Menu) Start() {
 
 		if index != prevIndex || !printed {
 			util.Clear()
-			fmt.Println("STATUS:\nKEYBOARD:", inp.KEYBOARD.IsRunning, "\nCONTROLLER:", inp.CONTROLLER.IsRunning)
+			fmt.Println("STATUS:\nKEYBOARD:", inp.KEYBOARD.IsRunning, "\nCONTROLLER:", inp.CONTROLLER.IsRunning, "\nWEBSOCKET:", com.WSCLIENT.Status.String())
 			fmt.Print(m.Header, "\n\n")
 			for i, o := range m.Opts {
 				if index == i {
