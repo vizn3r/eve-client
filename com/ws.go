@@ -1,11 +1,13 @@
 package com
 
 import (
+	"eve-client/inp"
 	"eve-client/serv"
 	"flag"
 	"fmt"
 	"log"
 	"net/url"
+	"strings"
 
 	"github.com/fasthttp/websocket"
 )
@@ -21,12 +23,32 @@ var (
 	addr     = flag.CommandLine.String("addr", "localhost:3000", "http service address")
 )
 
+func ChatWS() {
+	for {
+		msg := inp.StringInp()
+		fmt.Println("Test:", msg)
+		if strings.EqualFold(msg, "exit") {
+			return
+		}
+		res := SendWS(msg)
+		fmt.Println(res)
+	}
+}
+
 func SendWS(msg string) string {
-	if WSCLIENT.Status == serv.RUNNING {
+	if WSCLIENT.Status != serv.RUNNING {
 		return "WSCLIENT is not running, please chceck WSCLIENT status"
 	}
 	WSCLIENT.Msg <- msg
 	return <-WSCLIENT.MsgRes
+}
+
+func CloseWS(c *websocket.Conn) {
+	if err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")); err != nil {
+		fmt.Println(err)
+		return
+	}
+	c.Close()
 }
 
 func ConnectWS() {
@@ -41,14 +63,13 @@ func ConnectWS() {
 	log.Println("Connecting to:", u.String())
 
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	defer CloseWS(c)
 	if err != nil {
 		log.Println("Dial:", err)
 		return
 	}
-	defer c.Close()
 
 	done := make(chan struct{})
-
 	go func() {
 		defer close(done)
 		for {
@@ -62,25 +83,17 @@ func ConnectWS() {
 	}()
 
 	WSCLIENT.Status = serv.RUNNING
-	fmt.Println("Connected to server")
 	for {
-		var msg string
-		select {
-		case msg = <-WSCLIENT.Msg:
-		default:
-			msg = ""
-		}
-		fmt.Println(msg)
-		if msg == "exit" {
-			if err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")); err != nil {
+		msg := <-WSCLIENT.Msg
+		// if msg == "exit" {
+		// 	CloseWS(c)
+		// 	return
+		// }
+		if msg != "" {
+			if err := c.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
 				fmt.Println(err)
 				return
 			}
-			return
-		}
-		if err := c.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil || msg != "" {
-			fmt.Println(err)
-			return
 		}
 	}
 }

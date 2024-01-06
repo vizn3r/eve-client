@@ -29,6 +29,7 @@ func main() {
 	k := inp.KEYBOARD
 	k.Output = make(chan inp.KeyboardOutput)
 	k.Exit = make(chan bool)
+	k.GetKey = make(chan bool, 1)
 	k.IsRunning = true
 	k.WG = &wg
 
@@ -37,6 +38,7 @@ func main() {
 	com.WSCLIENT.Status = serv.STARTING
 
 	go inp.OpenKeyboard()
+	k.GetKey <- true
 	go inp.OpenController(0)
 	go com.ConnectWS()
 
@@ -63,10 +65,14 @@ func main() {
 			{
 				Name: "Send Message",
 				Func: func() {
-					msg := inp.StringInp()
-					com.SendWS(msg)
-					fmt.Println(<-com.WSCLIENT.MsgRes)
+					msg := com.SendWS(inp.StringInp())
+					fmt.Println(msg)
+					time.Sleep(time.Second)
 				},
+			},
+			{
+				Name: "Chat",
+				Func: com.ChatWS,
 			},
 		},
 	}

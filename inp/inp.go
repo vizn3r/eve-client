@@ -107,7 +107,6 @@ func Inp() InpType {
 }
 
 func StringInp() string {
-	KEYBOARD.GetKey = false
 	s := bufio.NewScanner(os.Stdin)
 	for s.Err() == nil {
 		if s.Scan() {

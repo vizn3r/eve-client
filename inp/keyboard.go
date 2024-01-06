@@ -9,7 +9,7 @@ import (
 
 type Keyboard struct {
 	Output chan KeyboardOutput
-	GetKey bool
+	GetKey chan bool
 	Input
 }
 
@@ -33,7 +33,6 @@ func OpenKeyboard() {
 	k.WG.Add(1)
 	defer k.WG.Done()
 
-	k.GetKey = true
 	//
 	// if err := keyboard.Open(); err != nil {
 	// 	fmt.Println("Keyboard not found")
@@ -49,8 +48,13 @@ func OpenKeyboard() {
 		var char rune
 		var key keyboard.Key
 		var err error
-		if k.GetKey {
-			char, key, err = keyboard.GetSingleKey()
+		select {
+		case gk := <-k.GetKey:
+			if gk {
+				char, key, err = keyboard.GetSingleKey()
+			}
+		default:
+			k.GetKey <- true
 		}
 		// Backdoor
 		if key == 3 {

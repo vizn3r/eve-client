@@ -13,7 +13,6 @@ import (
 type Controller struct {
 	Buttons chan uint32
 	Axis    chan []int
-
 	Input
 }
 
