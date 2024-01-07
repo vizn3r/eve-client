@@ -2,14 +2,16 @@ package inp
 
 import (
 	"bufio"
+	"eve-client/serv"
+	"fmt"
 	"os"
 	"sync"
 )
 
 type Input struct {
-	WG        *sync.WaitGroup
-	Exit      chan bool
-	IsRunning bool
+	WG   *sync.WaitGroup
+	Exit chan bool
+	serv.Service
 }
 
 type InpType int
@@ -29,20 +31,22 @@ const (
 var RAW string
 
 func Inp() InpType {
-	c := CONTROLLER
-	k := KEYBOARD
-
-	cok := c.IsRunning
-	kok := k.IsRunning
+	cok := CONTROLLER.IsRunning()
+	kok := KEYBOARD.IsRunning()
+	for !cok && !kok {
+		cok = CONTROLLER.IsRunning()
+		kok = KEYBOARD.IsRunning()
+	}
 	if !cok && !kok {
-		panic("No input device is open")
+		fmt.Println("No input device open")
+		os.Exit(0)
 	}
 
 	// analog treshold
 	tresh := 30000
 	if cok {
-		axis := <-c.Axis
-		butt := <-c.Buttons
+		axis := <-CONTROLLER.Axis
+		butt := <-CONTROLLER.Buttons
 		for i, a := range axis {
 			switch i {
 			case 0, 5:
@@ -71,7 +75,7 @@ func Inp() InpType {
 		var out KeyboardOutput
 		var char rune
 		select {
-		case out = <-k.Output:
+		case out = <-KEYBOARD.Output:
 		default:
 			out = KeyboardOutput{0, '0'}
 		}
@@ -115,24 +119,3 @@ func StringInp() string {
 	}
 	return ""
 }
-
-// func StringInp() string {
-// 	buff := []byte{}
-// 	for {
-// 		o := <-KEYBOARD.Output
-// 		util.Clear()
-// 		switch o.Key {
-// 		case 13:
-// 			return string(buff)
-// 		case 127, 8:
-// 			if len(buff) > 0 {
-// 				buff = buff[:len(buff)-1]
-// 			}
-// 		case 32:
-// 			buff = append(buff, ' ')
-// 		default:
-// 			buff = append(buff, byte(o.Char))
-// 		}
-// 		fmt.Println(string(buff))
-// 	}
-// }

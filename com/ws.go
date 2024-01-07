@@ -3,7 +3,6 @@ package com
 import (
 	"eve-client/inp"
 	"eve-client/serv"
-	"flag"
 	"fmt"
 	"log"
 	"net/url"
@@ -18,10 +17,7 @@ type WSClient struct {
 	serv.Service
 }
 
-var (
-	WSCLIENT = new(WSClient)
-	addr     = flag.CommandLine.String("addr", "localhost:3000", "http service address")
-)
+var WSCLIENT = new(WSClient)
 
 func ChatWS() {
 	for {
@@ -52,15 +48,12 @@ func CloseWS(c *websocket.Conn) {
 }
 
 func ConnectWS() {
-	flag.Parse()
-	log.SetFlags(0)
-
 	u := url.URL{
 		Scheme: "ws",
-		Host:   *addr,
+		Host:   "localhost:3000",
 		Path:   "/ws/123",
 	}
-	log.Println("Connecting to:", u.String())
+	fmt.Println("Connecting to:", u.String())
 
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	defer CloseWS(c)
@@ -69,9 +62,7 @@ func ConnectWS() {
 		return
 	}
 
-	done := make(chan struct{})
 	go func() {
-		defer close(done)
 		for {
 			_, msg, err := c.ReadMessage()
 			if err != nil {
@@ -85,10 +76,7 @@ func ConnectWS() {
 	WSCLIENT.Status = serv.RUNNING
 	for {
 		msg := <-WSCLIENT.Msg
-		// if msg == "exit" {
-		// 	CloseWS(c)
-		// 	return
-		// }
+
 		if msg != "" {
 			if err := c.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
 				fmt.Println(err)

@@ -1,6 +1,7 @@
 package inp
 
 import (
+	"eve-client/serv"
 	"fmt"
 	"os"
 
@@ -21,40 +22,34 @@ type KeyboardOutput struct {
 var KEYBOARD = new(Keyboard)
 
 func CloseKeyboard() {
-	k := *KEYBOARD
-	close(k.Exit)
-	close(k.Output)
-	k.IsRunning = false
-	// _ = keyboard.Close()
+	close(KEYBOARD.Exit)
+	close(KEYBOARD.Output)
+	KEYBOARD.Status = serv.STARTING
+	keyboard.Close()
 }
 
 func OpenKeyboard() {
-	k := *KEYBOARD
-	k.WG.Add(1)
-	defer k.WG.Done()
+	KEYBOARD.WG.Add(1)
+	defer KEYBOARD.WG.Done()
 
-	//
-	// if err := keyboard.Open(); err != nil {
-	// 	fmt.Println("Keyboard not found")
-	// 	return
-	// }
-
+	// Arrow key codes
 	// aup 65517
 	// ado 65516
 	// ari 65514
 	// ale 65515
 
+	KEYBOARD.Status = serv.RUNNING
 	for {
 		var char rune
 		var key keyboard.Key
 		var err error
 		select {
-		case gk := <-k.GetKey:
+		case gk := <-KEYBOARD.GetKey:
 			if gk {
 				char, key, err = keyboard.GetSingleKey()
 			}
 		default:
-			k.GetKey <- true
+			KEYBOARD.GetKey <- true
 		}
 		// Backdoor
 		if key == 3 {
@@ -65,10 +60,10 @@ func OpenKeyboard() {
 			panic(err)
 		}
 		select {
-		case <-k.Exit:
+		case <-KEYBOARD.Exit:
 			keyboard.Close()
 			return
-		case k.Output <- KeyboardOutput{key, char}:
+		case KEYBOARD.Output <- KeyboardOutput{key, char}:
 			keyboard.Close()
 		}
 	}

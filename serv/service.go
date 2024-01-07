@@ -14,6 +14,10 @@ const (
 	STARTING
 )
 
+func (serv Service) IsRunning() bool {
+	return serv.Status == RUNNING
+}
+
 func (s Status) String() string {
 	switch s {
 	case RUNNING:

@@ -11,34 +11,27 @@ import (
 	"time"
 )
 
-// func test() {
-// 	fmt.Println("Test")
-// 	time.Sleep(time.Second * 1)
-// }
-
 func main() {
 	var wg sync.WaitGroup
 
-	c := inp.CONTROLLER
-	c.Axis = make(chan []int)
-	c.Buttons = make(chan uint32)
-	c.Exit = make(chan bool)
-	c.IsRunning = true
-	c.WG = &wg
+	inp.CONTROLLER.Axis = make(chan []int)
+	inp.CONTROLLER.Buttons = make(chan uint32)
+	inp.CONTROLLER.Exit = make(chan bool)
+	inp.CONTROLLER.Status = serv.STARTING
+	inp.CONTROLLER.WG = &wg
 
-	k := inp.KEYBOARD
-	k.Output = make(chan inp.KeyboardOutput)
-	k.Exit = make(chan bool)
-	k.GetKey = make(chan bool, 1)
-	k.IsRunning = true
-	k.WG = &wg
+	inp.KEYBOARD.Output = make(chan inp.KeyboardOutput)
+	inp.KEYBOARD.Exit = make(chan bool)
+	inp.KEYBOARD.GetKey = make(chan bool, 1)
+	inp.KEYBOARD.Status = serv.STARTING
+	inp.KEYBOARD.WG = &wg
 
 	com.WSCLIENT.Msg = make(chan string)
 	com.WSCLIENT.MsgRes = make(chan string)
 	com.WSCLIENT.Status = serv.STARTING
 
 	go inp.OpenKeyboard()
-	k.GetKey <- true
+	inp.KEYBOARD.GetKey <- true
 	go inp.OpenController(0)
 	go com.ConnectWS()
 
@@ -58,10 +51,6 @@ func main() {
 	wsmenu := cli.Menu{
 		Header: "WebSocket communication",
 		Opts: []cli.Opt{
-			// {
-			// 	Name: "Connect",
-			// 	Func: ,
-			// },
 			{
 				Name: "Send Message",
 				Func: func() {

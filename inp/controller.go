@@ -1,6 +1,7 @@
 package inp
 
 import (
+	"eve-client/serv"
 	"fmt"
 	"time"
 
@@ -20,25 +21,23 @@ var CONTROLLER = new(Controller)
 
 // Close CONTROLLER channels and set IsRunning to false
 func CloseController() {
-	c := CONTROLLER
-	close(c.Exit)
-	close(c.Buttons)
-	close(c.Axis)
-	c.IsRunning = false
+	close(CONTROLLER.Exit)
+	close(CONTROLLER.Buttons)
+	close(CONTROLLER.Axis)
+	CONTROLLER.Status = serv.STOPPED
 }
 
 func ControllerIsReady() bool {
-	if !CONTROLLER.IsRunning {
+	if !CONTROLLER.IsRunning() {
 		fmt.Println("Controller is not connected")
 		time.Sleep(time.Second)
 	}
-	return CONTROLLER.IsRunning
+	return CONTROLLER.IsRunning()
 }
 
 func OpenController(id int) {
-	c := CONTROLLER
-	c.WG.Add(1)
-	defer c.WG.Done()
+	CONTROLLER.WG.Add(1)
+	defer CONTROLLER.WG.Done()
 	defer CloseController()
 
 	js, err := joystick.Open(id)
@@ -55,10 +54,10 @@ func OpenController(id int) {
 			return
 		}
 		select {
-		case <-c.Exit:
+		case <-CONTROLLER.Exit:
 			return
-		case c.Buttons <- state.Buttons:
-		case c.Axis <- state.AxisData:
+		case CONTROLLER.Buttons <- state.Buttons:
+		case CONTROLLER.Axis <- state.AxisData:
 		}
 	}
 }

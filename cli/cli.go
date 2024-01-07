@@ -43,8 +43,9 @@ func (m *Menu) Start() {
 
 		if index != prevIndex || !printed {
 			util.Clear()
-			fmt.Println("STATUS:\nKEYBOARD:", inp.KEYBOARD.IsRunning, "\nCONTROLLER:", inp.CONTROLLER.IsRunning, "\nWEBSOCKET:", com.WSCLIENT.Status.String())
+			fmt.Println("STATUS:\nKEYBOARD:", inp.KEYBOARD.Status.String(), "\nCONTROLLER:", inp.CONTROLLER.Status.String(), "\nWEBSOCKET:", com.WSCLIENT.Status.String())
 			fmt.Print(m.Header, "\n\n")
+
 			for i, o := range m.Opts {
 				if index == i {
 					fmt.Print("> ")
@@ -53,34 +54,28 @@ func (m *Menu) Start() {
 				}
 				fmt.Println(" " + o.Name)
 			}
+
 			prevIndex = index
 			printed = true
 		} else if in == inp.Down && !trig {
-			prevIn = in
-
 			if index == len(m.Opts)-1 {
 				index = 0
 			} else {
 				index++
 			}
 		} else if in == inp.Up && !trig {
-			prevIn = in
-
 			if index == 0 {
 				index = len(m.Opts) - 1
 			} else {
 				index--
 			}
 		} else if (in == inp.Back || in == inp.Left) && !trig {
-			prevIn = in
-
 			if prevMenu.Header == "" {
 				return
 			}
+
 			prevMenu.Start()
 		} else if (in == inp.Select || in == inp.Right) && !trig {
-			prevIn = in
-
 			if f := m.Opts[index].Func; f != nil {
 				util.Clear()
 				f()
