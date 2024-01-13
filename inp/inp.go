@@ -36,6 +36,7 @@ func Inp() InpType {
 	for !cok && !kok {
 		cok = CONTROLLER.IsRunning()
 		kok = KEYBOARD.IsRunning()
+		fmt.Println(cok, kok)
 	}
 	if !cok && !kok {
 		fmt.Println("No input device open")

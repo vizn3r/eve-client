@@ -22,7 +22,6 @@ var WSCLIENT = new(WSClient)
 func ChatWS() {
 	for {
 		msg := inp.StringInp()
-		fmt.Println("Test:", msg)
 		if strings.EqualFold(msg, "exit") {
 			return
 		}
@@ -32,7 +31,7 @@ func ChatWS() {
 }
 
 func SendWS(msg string) string {
-	if WSCLIENT.Status != serv.RUNNING {
+	if WSCLIENT.IsRunning() {
 		return "WSCLIENT is not running, please chceck WSCLIENT status"
 	}
 	WSCLIENT.Msg <- msg
@@ -40,10 +39,12 @@ func SendWS(msg string) string {
 }
 
 func CloseWS(c *websocket.Conn) {
+	fmt.Println("Closing WSCLIENT")
 	if err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")); err != nil {
 		fmt.Println(err)
 		return
 	}
+	WSCLIENT.Status = serv.STOPPED
 	c.Close()
 }
 
@@ -62,6 +63,8 @@ func ConnectWS() {
 		return
 	}
 
+	WSCLIENT.Status = serv.RUNNING
+
 	go func() {
 		for {
 			_, msg, err := c.ReadMessage()
@@ -73,7 +76,6 @@ func ConnectWS() {
 		}
 	}()
 
-	WSCLIENT.Status = serv.RUNNING
 	for {
 		msg := <-WSCLIENT.Msg
 
