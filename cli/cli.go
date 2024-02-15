@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"eve-client/com"
 	"eve-client/inp"
 	"eve-client/util"
 	"fmt"
@@ -22,9 +21,13 @@ func Start(m Menu) {
 	m.Start()
 }
 
-var prevMenu = new(Menu)
+var (
+	CURRENT_MENU Menu
+	menu         = 0
+)
 
 // it works, don't touch it
+// lmao, touched it :P
 func (m *Menu) Start() {
 	index := 0
 	prevIndex := 0
@@ -42,10 +45,10 @@ func (m *Menu) Start() {
 		}
 
 		if index != prevIndex || !printed {
+			CURRENT_MENU = *m
 			util.Clear()
-			fmt.Println("STATUS:\nKEYBOARD:", inp.KEYBOARD.Status.String(), "\nCONTROLLER:", inp.CONTROLLER.Status.String(), "\nWEBSOCKET:", com.WSCLIENT.Status.String())
+			fmt.Println("KEYBOARD:", inp.KEYBOARD.Status.String(), "\nCONTROLLER:", inp.CONTROLLER.Status.String())
 			fmt.Print(m.Header, "\n\n")
-
 			for i, o := range m.Opts {
 				if index == i {
 					fmt.Print("> ")
@@ -54,7 +57,6 @@ func (m *Menu) Start() {
 				}
 				fmt.Println(" " + o.Name)
 			}
-
 			prevIndex = index
 			printed = true
 		} else if in == inp.Down && !trig {
@@ -70,18 +72,17 @@ func (m *Menu) Start() {
 				index--
 			}
 		} else if (in == inp.Back || in == inp.Left) && !trig {
-			if prevMenu.Header == "" {
-				return
+			if menu > 0 {
+				break
 			}
-
-			prevMenu.Start()
 		} else if (in == inp.Select || in == inp.Right) && !trig {
 			if f := m.Opts[index].Func; f != nil {
 				util.Clear()
 				f()
 				printed = false
 			} else if next := m.Opts[index].Next; next.Header != "" {
-				prevMenu = m
+				printed = false
+				menu++
 				next.Start()
 			}
 		}

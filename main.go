@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 	"sync"
-	"time"
 )
 
 func main() {
@@ -52,16 +51,12 @@ func main() {
 		Header: "WebSocket communication",
 		Opts: []cli.Opt{
 			{
-				Name: "Send Message",
-				Func: func() {
-					msg := com.SendWS(inp.StringInp())
-					fmt.Println(msg)
-					time.Sleep(time.Second)
-				},
-			},
-			{
 				Name: "Chat",
 				Func: com.ChatWS,
+			},
+			{
+				Name: "List files",
+				Next: cli.Menu{Header: "List of all files", Opts: com.GetFileList()},
 			},
 		},
 	}
@@ -74,7 +69,7 @@ func main() {
 ▐█▄▄▌ ███ ▐█▄▄▌    ▐███▌▐█▌▐▌▐█▌▐█▄▄▌██▐█▌ ▐█▌·
  ▀▀▀ . ▀   ▀▀▀     ·▀▀▀ .▀▀▀ ▀▀▀ ▀▀▀ ▀▀ █▪ ▀▀▀ 
 
-EVE Client v0.0.2
+EVE Client v0.0.3
 by vizn3r
  ` + "\nMain menu",
 		Opts: []cli.Opt{
@@ -100,9 +95,21 @@ by vizn3r
 			},
 			{
 				Name: "Test",
-				Func: func() {
-					fmt.Println(inp.StringInp())
-					time.Sleep(time.Second)
+				Next: cli.Menu{
+					Header: "Test2",
+					Opts: []cli.Opt{
+						{
+							Name: "Test",
+							Next: cli.Menu{
+								Header: "Test3",
+								Opts: []cli.Opt{
+									{
+										Name: "Test3",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 			{

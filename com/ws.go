@@ -17,7 +17,10 @@ type WSClient struct {
 	serv.Service
 }
 
-var WSCLIENT = new(WSClient)
+var (
+	WSCLIENT = new(WSClient)
+	WS_HOST  = "localhost:8080"
+)
 
 func ChatWS() {
 	for {
@@ -31,7 +34,7 @@ func ChatWS() {
 }
 
 func SendWS(msg string) string {
-	if WSCLIENT.IsRunning() {
+	if !WSCLIENT.IsRunning() {
 		return "WSCLIENT is not running, please chceck WSCLIENT status"
 	}
 	WSCLIENT.Msg <- msg
@@ -51,7 +54,7 @@ func CloseWS(c *websocket.Conn) {
 func ConnectWS() {
 	u := url.URL{
 		Scheme: "ws",
-		Host:   "localhost:3000",
+		Host:   WS_HOST,
 		Path:   "/ws/123",
 	}
 	fmt.Println("Connecting to:", u.String())
