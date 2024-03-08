@@ -48,6 +48,8 @@ func OpenController(id int) {
 	}
 	defer js.Close()
 
+	CONTROLLER.Status = serv.RUNNING
+
 	for {
 		state, err := js.Read()
 		if err != nil {
