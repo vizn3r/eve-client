@@ -1,11 +1,13 @@
 package com
 
 import (
+	"bufio"
 	"eve-client/inp"
 	"eve-client/serv"
 	"fmt"
 	"log"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/fasthttp/websocket"
@@ -87,6 +89,29 @@ func ConnectWS() {
 				fmt.Println(err)
 				return
 			}
+		}
+	}
+}
+
+func MotorController() {
+	numMotors := -1
+	rawOut := SendWS("m0")
+	s := bufio.NewScanner(strings.NewReader(rawOut))
+	for s.Scan() {
+		numMotors++
+	}
+	for {
+		in := inp.Inp()
+		if in == inp.Back {
+			return
+		}
+		for i, con := range <-inp.CONTROLLER.Axis {
+			dir := 0
+			if con < 0 {
+				dir = 1
+			}
+			// m3 <>
+			SendWS("m3 " + strconv.Itoa(i) + " " + strconv.Itoa(dir) + " 5 10")
 		}
 	}
 }

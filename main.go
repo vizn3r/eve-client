@@ -5,6 +5,7 @@ import (
 	"eve-client/com"
 	"eve-client/inp"
 	"eve-client/serv"
+	"eve-client/visual"
 	"fmt"
 	"os"
 	"sync"
@@ -92,6 +93,15 @@ by vizn3r
 			{
 				Name: "WebSocket",
 				Next: wsmenu,
+			},
+			{
+				Name: "Visualization",
+				Func: func() {
+					fmt.Println(visual.IS_RUNNING)
+					if !visual.IS_RUNNING {
+						go visual.RunApp()
+					}
+				},
 			},
 			{
 				Name: "Test",

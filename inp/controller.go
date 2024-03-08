@@ -29,7 +29,7 @@ func CloseController() {
 
 func ControllerIsReady() bool {
 	if !CONTROLLER.IsRunning() {
-		fmt.Println("Controller is not connected")
+		fmt.Println("[🎮]<⚠️ > Controller is not connected")
 		time.Sleep(time.Second)
 	}
 	return CONTROLLER.IsRunning()
@@ -42,7 +42,8 @@ func OpenController(id int) {
 
 	js, err := joystick.Open(id)
 	if err != nil {
-		fmt.Println("Controller not found")
+		fmt.Println("[🎮]<⚠️ > Controller not found")
+		time.Sleep(time.Second)
 		return
 	}
 	defer js.Close()
@@ -50,7 +51,8 @@ func OpenController(id int) {
 	for {
 		state, err := js.Read()
 		if err != nil {
-			fmt.Println("Controller not found")
+			fmt.Println("[🎮]<⚠️ > Controller not found")
+			time.Sleep(time.Second)
 			return
 		}
 		select {
