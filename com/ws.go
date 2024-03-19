@@ -96,14 +96,13 @@ func SendController() {
 		inp.WaitForAny()
 	}
 	for {
-		axis := <-inp.CONTROLLER.Axis
-		if axis[0] > 30000 && <-inp.CONTROLLER.Buttons == 2 {
+		if axis := <-inp.CONTROLLER.Axis; axis[0] > 30000 && <-inp.CONTROLLER.Buttons == 2 {
 			return
 		}
 		msg := "CON"
-		for i, d := range axis {
+		for i, d := range <-inp.CONTROLLER.Axis {
 			msg += strconv.Itoa(d)
-			if i != len(axis)-1 {
+			if i != len(<-inp.CONTROLLER.Axis)-1 {
 				msg += "/"
 			}
 		}
