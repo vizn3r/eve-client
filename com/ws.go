@@ -91,17 +91,19 @@ func ConnectWS() {
 }
 
 func SendController() {
+	if !inp.ControllerIsReady() {
+		LOG.Warning("Controller is not connected")
+		inp.WaitForAny()
+	}
 	for {
-		data := <-inp.CONTROLLER.Axis
-		in := inp.Inp()
-		if in == inp.Back {
+		axis := <-inp.CONTROLLER.Axis
+		if axis[0] > 30000 && <-inp.CONTROLLER.Buttons == 2 {
 			return
 		}
 		msg := "CON"
-		for i, d := range data {
-			// time.Sleep(time.Millisecond * )
+		for i, d := range axis {
 			msg += strconv.Itoa(d)
-			if i != len(data)-1 {
+			if i != len(axis)-1 {
 				msg += "/"
 			}
 		}
@@ -128,5 +130,6 @@ func SendController() {
 
 // 			SendWS("k0")
 // 		}
-// 	}
+/
+/ 	}
 // }
