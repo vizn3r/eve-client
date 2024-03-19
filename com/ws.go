@@ -111,25 +111,3 @@ func SendController() {
 		LOG.Message(res)
 	}
 }
-
-// // NEED KINEMATICS IN FIRMWARE
-// func MotorController() {
-// 	numMotors := -1
-// 	rawOut := SendWS("m0")
-// 	s := bufio.NewScanner(strings.NewReader(rawOut))
-// 	for s.Scan() {
-// 		numMotors++
-// 	}
-// 	for {
-// 		in := inp.Inp()
-// 		if in == inp.Back {
-// 			return
-// 		}
-// 		switch in {
-// 		case inp.Up:
-
-// 			SendWS("k0")
-// 		}
-//
-// 	}
-// }
