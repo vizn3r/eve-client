@@ -128,7 +128,7 @@ func StringInp() string {
 }
 
 func WaitForBack() {
-	LOG.Message("Press 'Left' or 'Back'")
+	LOG.Message("Press ")
 	for {
 		in := Inp()
 		if in == Back || in == Left {

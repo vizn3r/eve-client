@@ -54,6 +54,10 @@ func main() {
 				Name: "Chat",
 				Func: com.ChatWS,
 			},
+			{
+				Name: "Control",
+				Func: com.SendController,
+			},
 		},
 	}
 

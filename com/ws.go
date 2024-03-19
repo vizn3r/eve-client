@@ -1,10 +1,10 @@
 package com
 
 import (
-	"bufio"
 	"eve-client/inp"
 	"eve-client/serv"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/fasthttp/websocket"
@@ -90,22 +90,42 @@ func ConnectWS() {
 	}
 }
 
-// NEED KINEMATICS IN FIRMWARE
-func MotorController() {
-	numMotors := -1
-	rawOut := SendWS("m0")
-	s := bufio.NewScanner(strings.NewReader(rawOut))
-	for s.Scan() {
-		numMotors++
-	}
+func SendController() {
 	for {
+		data := <-inp.CONTROLLER.Axis
 		in := inp.Inp()
 		if in == inp.Back {
 			return
 		}
-		switch in {
-		case inp.Up:
-			SendWS("k0")
+		msg := ""
+		for i, d := range data {
+			msg += strconv.Itoa(d)
+			if i != len(data)-1 {
+				msg += "/"
+			}
 		}
+		res := SendWS(msg)
+		LOG.Message(res)
 	}
 }
+
+// // NEED KINEMATICS IN FIRMWARE
+// func MotorController() {
+// 	numMotors := -1
+// 	rawOut := SendWS("m0")
+// 	s := bufio.NewScanner(strings.NewReader(rawOut))
+// 	for s.Scan() {
+// 		numMotors++
+// 	}
+// 	for {
+// 		in := inp.Inp()
+// 		if in == inp.Back {
+// 			return
+// 		}
+// 		switch in {
+// 		case inp.Up:
+
+// 			SendWS("k0")
+// 		}
+// 	}
+// }
