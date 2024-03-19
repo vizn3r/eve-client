@@ -97,7 +97,7 @@ func SendController() {
 		if in == inp.Back {
 			return
 		}
-		msg := ""
+		msg := "CON"
 		for i, d := range data {
 			msg += strconv.Itoa(d)
 			if i != len(data)-1 {
