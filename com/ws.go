@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fasthttp/websocket"
 )
@@ -99,6 +100,7 @@ func SendController() {
 		}
 		msg := "CON"
 		for i, d := range data {
+			time.Sleep(time.Millisecond * 100)
 			msg += strconv.Itoa(d)
 			if i != len(data)-1 {
 				msg += "/"
