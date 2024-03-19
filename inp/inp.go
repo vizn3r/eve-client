@@ -2,6 +2,7 @@ package inp
 
 import (
 	"bufio"
+	"eve-client/log"
 	"eve-client/serv"
 	"fmt"
 	"os"
@@ -28,7 +29,12 @@ const (
 	Back
 )
 
-var RAW string
+var (
+	RAW string
+	LOG = log.Logger{
+		Emoji: "🔤",
+	}
+)
 
 func Inp() InpType {
 	cok := CONTROLLER.IsRunning()
@@ -119,4 +125,24 @@ func StringInp() string {
 		}
 	}
 	return ""
+}
+
+func WaitForBack() {
+	LOG.Message("Press 'Left' or 'Back'")
+	for {
+		in := Inp()
+		if in == Back || in == Left {
+			return
+		}
+	}
+}
+
+func WaitForAny() {
+	LOG.Message("Press 'any' movement")
+	for {
+		in := Inp()
+		if in != 0 {
+			return
+		}
+	}
 }

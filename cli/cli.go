@@ -2,6 +2,7 @@ package cli
 
 import (
 	"eve-client/inp"
+	"eve-client/log"
 	"eve-client/util"
 	"fmt"
 )
@@ -47,15 +48,14 @@ func (m *Menu) Start() {
 		if index != prevIndex || !printed {
 			CURRENT_MENU = *m
 			util.Clear()
-			fmt.Println("KEYBOARD:", inp.KEYBOARD.Status.String(), "\nCONTROLLER:", inp.CONTROLLER.Status.String())
 			fmt.Print(m.Header, "\n\n")
 			for i, o := range m.Opts {
 				if index == i {
-					fmt.Print("> ")
+					log.PrintColor("> ", log.UNDERLINE, log.BOLD, o.Name)
+					// fmt.Print("> ", o.Name)
 				} else {
-					fmt.Print(" ")
+					fmt.Println(" ", o.Name)
 				}
-				fmt.Println(" " + o.Name)
 			}
 			prevIndex = index
 			printed = true

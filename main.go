@@ -47,16 +47,27 @@ func main() {
 		},
 	}
 
-	wsmenu := cli.Menu{
-		Header: "WebSocket communication",
+	commenu := cli.Menu{
+		Header: "Firmware communication",
 		Opts: []cli.Opt{
 			{
 				Name: "Chat",
 				Func: com.ChatWS,
 			},
+		},
+	}
+
+	com.GetFileList()
+	filemenu := cli.Menu{
+		Header: "File manipulation",
+		Opts: []cli.Opt{
 			{
-				Name: "List files",
-				Next: cli.Menu{Header: "List of all files", Opts: com.GetFileList()},
+				Name: "Remote files",
+				Next: cli.Menu{Header: "List of all files", Opts: com.FileList},
+			},
+			{
+				Name: "Local files",
+				Next: cli.Menu{Header: "Select a file to upload", Opts: com.SelectUploadFile()},
 			},
 		},
 	}
@@ -90,8 +101,8 @@ by vizn3r
 				},
 			},
 			{
-				Name: "WebSocket",
-				Next: wsmenu,
+				Name: "Communication",
+				Next: commenu,
 			},
 			// {
 			// 	Name: "Visualization",
@@ -103,23 +114,8 @@ by vizn3r
 			// 	},
 			// },
 			{
-				Name: "Test",
-				Next: cli.Menu{
-					Header: "Test2",
-					Opts: []cli.Opt{
-						{
-							Name: "Test",
-							Next: cli.Menu{
-								Header: "Test3",
-								Opts: []cli.Opt{
-									{
-										Name: "Test3",
-									},
-								},
-							},
-						},
-					},
-				},
+				Name: "Files",
+				Next: filemenu,
 			},
 			{
 				Name: "Exit",

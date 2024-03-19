@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"eve-client/cli"
 	"eve-client/inp"
+	"eve-client/log"
 	"fmt"
 	"os"
 	"strings"
@@ -12,14 +13,20 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-var HTTP_HOST = "http://localhost:8000"
+var LOG log.Logger = log.Logger{
+	Emoji: "📶",
+}
+
+var (
+	HTTP_HOST = "http://localhost:8000"
+	baseDir   = "./files/"
+)
 
 func GetReq(url string) []byte {
-	fmt.Println(url)
 	req := fiber.Get(url)
 	_, byte, err := req.Bytes()
 	if err != nil {
-		fmt.Println(err)
+		LOG.Error(err)
 		time.Sleep(time.Second * 2)
 	}
 
@@ -30,7 +37,7 @@ func PostReq(url string) []byte {
 	req := fiber.Post(url)
 	_, byte, err := req.Bytes()
 	if err != nil {
-		fmt.Println(err)
+		LOG.Error(err)
 		time.Sleep(time.Second * 2)
 	}
 
@@ -41,25 +48,11 @@ func DeleteReq(url string) []byte {
 	req := fiber.Delete(url)
 	_, byte, err := req.Bytes()
 	if err != nil {
-		fmt.Println(err)
+		LOG.Error(err)
 		time.Sleep(time.Second * 2)
 	}
 
 	return byte
-}
-
-var file = cli.CURRENT_MENU.Header
-
-func ExecFile() {
-	file = cli.CURRENT_MENU.Header
-	data := PostReq(HTTP_HOST + "/exec/" + file)
-	fmt.Println(string(data))
-	for {
-		in := inp.Inp()
-		if in == inp.Back || in == inp.Left {
-			return
-		}
-	}
 }
 
 var fileFuncs = []cli.Opt{
@@ -73,19 +66,49 @@ var fileFuncs = []cli.Opt{
 	},
 	{
 		Name: "Delete File",
-		Next: cli.Menu{
-			Header: "Are you sure?",
-			Opts: []cli.Opt{
-				{
-					Name: "Yes",
-					Func: DeleteFile,
-				},
-			},
+		Func: DeleteFile,
+	},
+}
+
+var localFileFuncs = []cli.Opt{
+	{
+		Name: "Send file",
+		Func: SendFile,
+	},
+	{
+		Name: "Execute file remotely",
+		Func: func() {
+			SendFile()
+			ExecFile()
 		},
 	},
 }
 
-func GetFileList() []cli.Opt {
+var FileList []cli.Opt
+
+func SelectUploadFile() []cli.Opt {
+	dir, err := os.ReadDir("./files")
+	if err != nil {
+		LOG.Error(err)
+	}
+
+	var opts []cli.Opt
+	for _, file := range dir {
+		opts = append(opts, cli.Opt{Name: file.Name(), Next: cli.Menu{Header: file.Name(), Opts: localFileFuncs}})
+	}
+	return opts
+}
+
+var file = cli.CURRENT_MENU.Header
+
+func ExecFile() {
+	file = cli.CURRENT_MENU.Header
+	data := PostReq(HTTP_HOST + "/exec/" + file)
+	LOG.Message(string(data))
+	inp.WaitForAny()
+}
+
+func GetFileList() {
 	file = cli.CURRENT_MENU.Header
 	data := GetReq(HTTP_HOST + "/files")
 	rawOpts := strings.Split(strings.TrimSpace(string(data)), " ")
@@ -93,25 +116,29 @@ func GetFileList() []cli.Opt {
 	for _, opt := range rawOpts {
 		opts = append(opts, cli.Opt{Name: opt, Next: cli.Menu{Header: opt, Opts: fileFuncs}})
 	}
-	return opts
+	FileList = opts
 }
 
 func SendFile() {
+	LOG.Info("Sending file")
 	file = cli.CURRENT_MENU.Header
-	data, err := os.ReadFile(file)
+	data, err := os.ReadFile(baseDir + file)
 	if err != nil {
-		fmt.Println(err)
+		LOG.Error(err)
 		return
 	}
 	str := base64.URLEncoding.EncodeToString(data)
+	LOG.Info("File sent")
 	out := PostReq(HTTP_HOST + "/files/" + file + "/" + str)
-	fmt.Println(string(out))
+	LOG.Message("SERVER:", string(out))
+	inp.WaitForAny()
 }
 
 func DeleteFile() {
 	file = cli.CURRENT_MENU.Header
 	out := DeleteReq(HTTP_HOST + "/files/" + file)
-	fmt.Println(string(out))
+	LOG.Message(string(out))
+	inp.WaitForAny()
 }
 
 func ReadFile() {

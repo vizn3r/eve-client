@@ -4,10 +4,7 @@ import (
 	"bufio"
 	"eve-client/inp"
 	"eve-client/serv"
-	"fmt"
-	"log"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/fasthttp/websocket"
@@ -31,7 +28,7 @@ func ChatWS() {
 			return
 		}
 		res := SendWS(msg)
-		fmt.Println(res)
+		LOG.Message(res)
 	}
 }
 
@@ -44,9 +41,9 @@ func SendWS(msg string) string {
 }
 
 func CloseWS(c *websocket.Conn) {
-	fmt.Println("Closing WSCLIENT")
+	LOG.Info("Closing WSCLIENT")
 	if err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")); err != nil {
-		fmt.Println(err)
+		LOG.Error(err)
 		return
 	}
 	WSCLIENT.Status = serv.STOPPED
@@ -59,12 +56,12 @@ func ConnectWS() {
 		Host:   WS_HOST,
 		Path:   "/ws/123",
 	}
-	fmt.Println("Connecting to:", u.String())
+	LOG.Info("Connecting to:", u.String())
 
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	defer CloseWS(c)
 	if err != nil {
-		log.Println("Dial:", err)
+		LOG.Warning("Dial:", err)
 		return
 	}
 
@@ -74,7 +71,7 @@ func ConnectWS() {
 		for {
 			_, msg, err := c.ReadMessage()
 			if err != nil {
-				fmt.Println(err)
+				LOG.Error(err)
 				return
 			}
 			WSCLIENT.MsgRes <- string(msg)
@@ -86,13 +83,14 @@ func ConnectWS() {
 
 		if msg != "" {
 			if err := c.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
-				fmt.Println(err)
+				LOG.Error(err)
 				return
 			}
 		}
 	}
 }
 
+// NEED KINEMATICS IN FIRMWARE
 func MotorController() {
 	numMotors := -1
 	rawOut := SendWS("m0")
@@ -105,13 +103,9 @@ func MotorController() {
 		if in == inp.Back {
 			return
 		}
-		for i, con := range <-inp.CONTROLLER.Axis {
-			dir := 0
-			if con < 0 {
-				dir = 1
-			}
-			// m3 <>
-			SendWS("m3 " + strconv.Itoa(i) + " " + strconv.Itoa(dir) + " 5 10")
+		switch in {
+		case inp.Up:
+			SendWS("k0")
 		}
 	}
 }
