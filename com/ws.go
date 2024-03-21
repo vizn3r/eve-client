@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fasthttp/websocket"
 )
@@ -95,6 +96,8 @@ func SendController() {
 		LOG.Warning("Controller is not connected")
 		inp.WaitForAny()
 	}
+	LOG.Info("Use controller to control arm")
+	LOG.Info("Exit by pullig LEFT 🕹️ to ➡️  and pressing 🅱️ ")
 	for {
 		if axis := <-inp.CONTROLLER.Axis; axis[0] > 30000 && <-inp.CONTROLLER.Buttons == 2 {
 			return
@@ -106,7 +109,7 @@ func SendController() {
 				msg += "/"
 			}
 		}
-		res := SendWS(msg)
-		LOG.Message(res)
+		WSCLIENT.Msg <- msg
+		time.Sleep(time.Microsecond)
 	}
 }
