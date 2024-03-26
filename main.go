@@ -51,12 +51,18 @@ func main() {
 		Header: "Firmware communication",
 		Opts: []cli.Opt{
 			{
-				Name: "Chat",
+				Name: "Command line",
 				Func: com.ChatWS,
 			},
 			{
-				Name: "Control",
+				Name: "Controller control",
 				Func: com.SendController,
+			},
+			{
+				Name: "Toggle motors",
+				Func: func() {
+					com.LOG.Message(com.SendWS("m5"))
+				},
 			},
 		},
 	}
@@ -84,7 +90,7 @@ func main() {
 ▐█▄▄▌ ███ ▐█▄▄▌    ▐███▌▐█▌▐▌▐█▌▐█▄▄▌██▐█▌ ▐█▌·
  ▀▀▀ . ▀   ▀▀▀     ·▀▀▀ .▀▀▀ ▀▀▀ ▀▀▀ ▀▀ █▪ ▀▀▀ 
 
-EVE Client v0.0.3
+EVE Client v1.0.0
 by vizn3r
  ` + "\nMain menu",
 		Opts: []cli.Opt{
@@ -108,15 +114,6 @@ by vizn3r
 				Name: "Communication",
 				Next: commenu,
 			},
-			// {
-			// 	Name: "Visualization",
-			// 	Func: func() {
-			// 		fmt.Println(visual.IS_RUNNING)
-			// 		if !visual.IS_RUNNING {
-			// 			go visual.RunApp()
-			// 		}
-			// 	},
-			// },
 			{
 				Name: "Files",
 				Next: filemenu,

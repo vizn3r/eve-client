@@ -18,7 +18,7 @@ var LOG log.Logger = log.Logger{
 }
 
 var (
-	HTTP_HOST = "http://localhost:8000"
+	HTTP_HOST = "http://10.0.0.111:8000"
 	baseDir   = "./files/"
 )
 

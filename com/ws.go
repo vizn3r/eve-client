@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/fasthttp/websocket"
 )
@@ -19,7 +18,7 @@ type WSClient struct {
 
 var (
 	WSCLIENT = new(WSClient)
-	WS_HOST  = "localhost:8080"
+	WS_HOST  = "10.0.0.111:8080"
 )
 
 func ChatWS() {
@@ -102,7 +101,7 @@ func SendController() {
 		if axis := <-inp.CONTROLLER.Axis; axis[0] > 30000 && <-inp.CONTROLLER.Buttons == 2 {
 			return
 		}
-		msg := "CON"
+		msg := "CON" + strconv.Itoa(int(<-inp.CONTROLLER.Buttons)) + "/"
 		for i, d := range <-inp.CONTROLLER.Axis {
 			msg += strconv.Itoa(d)
 			if i != len(<-inp.CONTROLLER.Axis)-1 {
@@ -110,6 +109,5 @@ func SendController() {
 			}
 		}
 		WSCLIENT.Msg <- msg
-		time.Sleep(time.Microsecond)
 	}
 }

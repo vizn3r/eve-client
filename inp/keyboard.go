@@ -32,12 +32,6 @@ func OpenKeyboard() {
 	KEYBOARD.WG.Add(1)
 	defer KEYBOARD.WG.Done()
 
-	// Arrow key codes
-	// aup 65517
-	// ado 65516
-	// ari 65514
-	// ale 65515
-
 	KEYBOARD.Status = serv.RUNNING
 	for {
 		var char rune
